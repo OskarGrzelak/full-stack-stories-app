@@ -23,7 +23,7 @@ exports.signup = async (req, res, next) => {
       expires: new Date(
         Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
       ),
-      httpOnly: true
+      httpOnly: true,
     })
 
     res.status(201).json({
@@ -44,7 +44,7 @@ exports.signup = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body
-    console.log("LOGIN", password)
+    console.log('LOGIN', password)
 
     if (!email || !password) {
       throw new Error('Please provide email and password')
@@ -64,13 +64,28 @@ exports.login = async (req, res, next) => {
       expires: new Date(
         Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
       ),
-      httpOnly: true
+      httpOnly: true,
     })
 
     res.status(200).json({
       status: 'success',
       token,
-      user
+      user,
+    })
+  } catch (error) {
+    res.status(404).json({
+      status: 'fail',
+      message: error.message,
+    })
+  }
+}
+
+exports.logout = async (req, res, next) => {
+  try {
+    res.clearCookie('jwt')
+
+    res.status(200).json({
+      status: 'success',
     })
   } catch (error) {
     res.status(404).json({
@@ -107,10 +122,7 @@ exports.loggedUser = async (req, res, next) => {
 exports.protect = async (req, res, next) => {
   try {
     let token
-    if (
-      req.headers.cookie &&
-      req.headers.cookie.startsWith('jwt')
-    ) {
+    if (req.headers.cookie && req.headers.cookie.startsWith('jwt')) {
       token = req.headers.cookie.split('=')[1]
     }
     if (!token) {

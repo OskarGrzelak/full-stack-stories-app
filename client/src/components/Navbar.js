@@ -1,4 +1,5 @@
-import React from 'react'
+import axios from 'axios'
+import React, {useState} from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -8,11 +9,16 @@ import logo from '../images/logo.png'
 import { ReactComponent as MenuIcon } from '../images/menu-icon.svg'
 
 const Nav = styled.nav`
-  height: 80px;
+  position: fixed;
+  top: 0;
+  max-width: 1200px;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
+  background-color: #fff;
+  z-index: 1
 `
 
 const Logo = styled.img`
@@ -50,6 +56,8 @@ const UserName = styled.p`
 const UserMenu = styled.div`
   display: flex;
   align-items: center;
+  position: relative;
+  padding: 20px;
 `
 
 const MenuButton = styled.span`
@@ -68,13 +76,47 @@ const MenuButton = styled.span`
   }
 `
 
+const MenuList = styled.ul`
+  list-style: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100vh;
+  padding: 90px 10px 10px;
+  background-color: #eee;
+  transform: ${props => props.active ? 'translateX(0)' : 'translateX(100%)'};
+  opacity: ${props => props.active ? '1' : '0'};
+  visibility: ${props => props.active ? 'visible' : 'hidden'};
+  transition: all 0.2s;
+  z-index: -1;
+`
+
+const MenuItem = styled.li`
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #fff;
+  }
+`
+
 const StyledMenuIcon = styled(MenuIcon)`
   height: 15px;
   color: #333;
 `
 
 const Navbar = () => {
-  const { loggedUser } = useLoggedUser()
+  const { loggedUser, setLoggedUser } = useLoggedUser()
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const toggleMenuList = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
+  const handleLogout = async () => {
+    await axios.get('/api/v1/users/logout')
+    setLoggedUser(null)
+  }
   return (
     <Nav>
       <Link to="/">
@@ -85,9 +127,14 @@ const Navbar = () => {
           {loggedUser ? (
             <UserMenu>
               <UserName>{loggedUser.name}</UserName>
-              <MenuButton>
+              <MenuButton onClick={toggleMenuList}>
                 <StyledMenuIcon />
               </MenuButton>
+              <MenuList active={isMenuOpen}>
+                <MenuItem>
+                  <span onClick={handleLogout}>Log out</span>
+                </MenuItem>
+              </MenuList>
             </UserMenu>
           ) : (
             <LoginButton to="/login">Log in</LoginButton>

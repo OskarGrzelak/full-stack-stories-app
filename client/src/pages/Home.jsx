@@ -8,7 +8,8 @@ import Navbar from '../components/Navbar'
 const Layout = styled.div`
   max-width: 1200px;
   width: 100%;
-  margin: 0 auto;
+  margin: 70px auto 0;
+  overflow-x: hidden;
 `
 
 const Posts = styled.ul`
